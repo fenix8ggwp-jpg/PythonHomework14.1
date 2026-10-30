@@ -24,3 +24,5 @@ def main() -> None:
         print(f"Загружено категорий из JSON: {len(categories)}")
     except FileNotFoundError:
         print("Файл products.json не найден.")
+if __name__ == "__main__":
+    main()
