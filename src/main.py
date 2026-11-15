@@ -1,43 +1,107 @@
-from src.models import Category, Product, CategoryIterator
+class Product:
+    """Базовый класс для всех продуктов."""
+
+    def __init__(self, name: str, description: str, price: float, quantity: int):
+        self.name = name
+        self.description = description
+        self.__price = price  # Приватный атрибут цены (из домашки 14.2)
+        self.quantity = quantity
+
+    @property
+    def price(self):
+        """Геттер для цены."""
+        return self.__price
+
+    @price.setter
+    def price(self, new_price: float):
+        """Сеттер для цены с проверкой."""
+        if new_price <= 0:
+            print("Цена не должна быть нулевая или отрицательная")
+        else:
+            self.__price = new_price
+
+    def __str__(self):
+        """Строковое отображение."""
+        return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
+
+    def __add__(self, other):
+        """
+        Сложение товаров
+        Задание 2: Ограничение сложения по типу.
+        """
+        # Проверяем, что типы объектов абсолютно одинаковые
+        if type(self) is not type(other):
+            raise TypeError("Нельзя складывать товары разных классов!")
+
+        # Считаем общую стоимость: (цена * количество) + (цена * количество)
+        return (self.price * self.quantity) + (other.price * other.quantity)
 
 
-def main() -> None:
-    """Точка входа в программу."""
-    product1 = Product("Samsung Galaxy S23", "256GB, Серый", 50000.0, 10)
-    product2 = Product("Iphone 15", "512GB, Черный", 100000.0, 5)
+class Category:
+    """Класс категории товаров."""
 
-    category1 = Category("Смартфоны", "Телефоны", [product1])
-    category1.add_product(product2)
+    # Атрибуты класса
+    total_categories = 0
+    total_products = 0
 
-    print(f"Всего категорий: {Category.category_count}")
-    print(f"Всего товаров: {Category.product_count}")
-    print("\nТовары в категории 'Смартфоны':")
-    print(category1.products)
+    def __init__(self, name: str, description: str):
+        self.name = name
+        self.description = description
+        self.__products = []  # Приватный список товаров
 
-    print("Пробуем установить отрицательную цену:")
-    product1.price = -100
+        # Увеличиваем счетчики при создании категории
+        Category.total_categories += 1
 
-    print("\nСоздаем новый товар через класс-метод:")
-    new_prod = Product.new_product({
-        "name": "Xiaomi",
-        "description": "128GB",
-        "price": 20000.0,
-        "quantity": 20
-    })
-    print(f"Создан товар: {new_prod.name}, Цена: {new_prod.price}")
+    def add_product(self, product):
+        """
+        Добавление продукта в категорию.
+        Задание 3 (текущее): Защита от добавления посторонних объектов.
+        """
+        # Проверяем, является ли объект экземпляром Product или его наследником
+        if not isinstance(product, Product):
+            raise TypeError("В категорию можно добавлять только объекты Product и его наследников!")
 
-    print("\n--- Демонстрация новых методов ---")
-    p1 = Product("Samsung", "256GB", 100.0, 10)
-    p2 = Product("Iphone", "512GB", 200.0, 2)
+        self.__products.append(product)
+        Category.total_products += 1
 
-    print("Строка продукта:", p1)
-    print("Строка категории:", category1)
-    print(f"Общая стоимость (p1 + p2): {p1 + p2} руб.")
+    @property
+    def products(self):
+        """
+        Геттер для вывода списка товаров.
+        """
+        return "\n".join([str(product) for product in self.__products])
 
-    print("\nПеребор товаров в категории через итератор:")
-    for product in CategoryIterator(category1):
-        print(product.name)
+    def __str__(self):
+        """Строковое отображение категории."""
+        # Считаем общее количество товаров на складе
+        total_quantity = sum(product.quantity for product in self.__products)
+        return f"{self.name}, количество продуктов: {total_quantity} шт."
 
 
-if __name__ == "__main__":
-    main()
+class Smartphone(Product):
+    """Класс Смартфон (наследник Product)."""
+
+    def __init__(self, name: str, description: str, price: float, quantity: int,
+                 efficiency: int, model: str, memory: int, color: str):
+        # Вызываем конструктор родителя
+        super().__init__(name, description, price, quantity)
+
+        # Добавляем уникальные атрибуты смартфона
+        self.efficiency = efficiency
+        self.model = model
+        self.memory = memory
+        self.color = color
+
+
+class LawnGrass(Product):
+    """Класс Трава газонная (наследник Product)."""
+
+    def __init__(self, name: str, description: str, price: float, quantity: int,
+                 country: str, germination_period: str, color: str):
+        # Вызываем конструктор родителя
+        super().__init__(name, description, price, quantity)
+
+        # Добавляем уникальные атрибуты травы
+        self.country = country
+        self.germination_period = germination_period
+        self.color = color
