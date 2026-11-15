@@ -114,3 +114,33 @@ def test_logging_mixin_output(capsys):
 
     # Проверяем, что в консоли есть название класса и параметры
     assert "Product('Тестовый товар', 'Описание', 500, 2)" in captured.out
+
+
+# ==========================================
+# ТЕСТЫ ДЛЯ ЗАДАНИЯ 17.1
+# ==========================================
+
+def test_product_zero_quantity_raises_error():
+    """Тест: при создании товара с нулевым количеством выбрасывается ValueError."""
+    with pytest.raises(ValueError, match="Товар с нулевым количеством не может быть добавлен"):
+        Product("Бракованный товар", "Описание", 100, 0)
+
+
+def test_category_middle_price_empty():
+    """Тест: средняя цена в пустой категории равна 0."""
+    category = Category("Пустая категория", "Описание")
+    assert category.middle_price() == 0
+
+
+def test_category_middle_price_with_products():
+    """Тест: корректный подсчет средней цены."""
+    category = Category("Электроника", "Гаджеты")
+    # Создаем товары с ценами 100 и 300 (средняя должна быть 200)
+    p1 = Product("Товар 1", "Описание", 100, 5)
+    p2 = Product("Товар 2", "Описание", 300, 2)
+
+    category.add_product(p1)
+    category.add_product(p2)
+
+    # Проверяем, что средняя цена = 200
+    assert category.middle_price() == 200

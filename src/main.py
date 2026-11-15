@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 
 # ==========================================
-# ЗАДАНИЕ 1: Абстрактный класс BaseProduct
+# БАЗОВЫЙ КЛАСС (без изменений)
 # ==========================================
 class BaseProduct(ABC):
     """Базовый абстрактный класс для всех продуктов."""
@@ -15,43 +15,34 @@ class BaseProduct(ABC):
 
     @abstractmethod
     def __str__(self):
-        """Строковое отображение продукта."""
         pass
 
 
 # ==========================================
-# ЗАДАНИЕ 2: Класс-миксин
+# МИКСИН (без изменений)
 # ==========================================
 class LoggingMixin:
     """Миксин, который печатает в консоль информацию о создании объекта."""
 
     def __init__(self, *args, **kwargs):
-        # Печатаем информацию
         class_name = self.__class__.__name__
-        # Собираем аргументы в читаемый вид
         args_str = ", ".join(repr(arg) for arg in args)
         kwargs_str = ", ".join(f"{k}={v!r}" for k, v in kwargs.items())
-
-        # Формируем строку (с запятыми между позиционными и именованными)
-        if args_str and kwargs_str:
-            all_params = f"{args_str}, {kwargs_str}"
-        else:
-            all_params = args_str or kwargs_str
-
+        all_params = f"{args_str}, {kwargs_str}" if args_str and kwargs_str else args_str or kwargs_str
         print(f"{class_name}({all_params})")
-
-        # Обязательно вызываем super().__init__, чтобы цепочка наследования работала
         super().__init__(*args, **kwargs)
 
 
 # ==========================================
-# Класс Product (теперь наследуется от Mixin и ABC)
+# КЛАСС PRODUCT (ДОБАВЛЕНА ПРОВЕРКА КОЛИЧЕСТВА)
 # ==========================================
 class Product(LoggingMixin, BaseProduct):
-    """Класс для продуктов. Наследует миксин и абстрактный класс."""
 
     def __init__(self, name: str, description: str, price: float, quantity: int):
-        # Так как BaseProduct абстрактный, мы должны вызвать его __init__
+        # ЗАДАНИЕ 1: Проверка на нулевое количество
+        if quantity == 0:
+            raise ValueError("Товар с нулевым количеством не может быть добавлен")
+
         super().__init__(name, description, price, quantity)
         self.price = price
 
@@ -76,7 +67,7 @@ class Product(LoggingMixin, BaseProduct):
 
 
 # ==========================================
-# Класс Category (без изменений)
+# КЛАСС CATEGORY (ДОБАВЛЕН МЕТОД СРЕДНЕЙ ЦЕНЫ)
 # ==========================================
 class Category:
     total_categories = 0
@@ -102,9 +93,20 @@ class Category:
         total_quantity = sum(product.quantity for product in self.__products)
         return f"{self.name}, количество продуктов: {total_quantity} шт."
 
+    # ЗАДАНИЕ 2: Метод подсчета средней цены
+    def middle_price(self) -> float:
+        """Возвращает среднюю цену товаров в категории. Если товаров нет — возвращает 0."""
+        try:
+            # Складываем цены всех товаров и делим на их количество
+            total_price = sum(product.price for product in self.__products)
+            return total_price / len(self.__products)
+        except ZeroDivisionError:
+            # Если товаров нет (деление на ноль), возвращаем 0
+            return 0
+
 
 # ==========================================
-# Классы-наследники (без изменений)
+# КЛАССЫ-НАСЛЕДНИКИ (без изменений)
 # ==========================================
 class Smartphone(Product):
     def __init__(self, name: str, description: str, price: float, quantity: int,
